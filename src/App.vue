@@ -4,7 +4,11 @@
 import { ref, computed } from "vue";
 
 // Constants
-import { initialSapling, initialMama } from "./assets/constants";
+import {
+  initialSapling,
+  initialMama,
+  worldTreeIncomes as worldTree,
+} from "./helpers/constants";
 
 // Helpers
 import uuidGen from "./helpers/uuidGenerator";
@@ -20,13 +24,19 @@ import CalendarTable from "./components/CalendarTable.vue";
 const plants = ref([]);
 const saplings = ref([]);
 const mamas = ref([]);
+const isWorldTreeActive = ref(false);
 
 // Computed properties
+const worldTreeIncomes = computed(() => {
+  return isWorldTreeActive.value ? [worldTree] : [];
+});
+
 const farm = computed(() => {
   return [
     ...plants.value.map((plant) => ({ ...plant, type: "plant" })),
     ...mamas.value.map((mama) => ({ ...mama, type: "mama" })),
     ...saplings.value.map((sapling) => ({ ...sapling, type: "sapling" })),
+    ...worldTreeIncomes.value,
   ];
 });
 
@@ -133,7 +143,10 @@ const updateFarmItem = (newFarmItemObject, type) => {
     />
   </div>
 
-  <CalendarTable :farm="farm"></CalendarTable>
+  <CalendarTable
+    :farm="farm"
+    v-model:is-world-tree-active="isWorldTreeActive"
+  ></CalendarTable>
 </template>
 
 <style>
@@ -153,5 +166,58 @@ const updateFarmItem = (newFarmItemObject, type) => {
   justify-content: space-between;
   align-items: center;
   overflow: auto;
+}
+
+.input-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column nowrap;
+  margin: 0.5rem auto;
+}
+
+.farm-item__container {
+  padding: 2rem;
+  margin: 3rem;
+  border: 1px solid black;
+  border-radius: 7px;
+  max-width: fit-content;
+}
+
+.farm-item__container button {
+  margin: 1rem 0 0;
+}
+
+.farm-item__container > h4 {
+  margin: 0 0 1rem;
+}
+
+.btn {
+  border: none;
+  border-radius: 7px;
+  padding: 0.3rem 0.7rem;
+  font-weight: bold;
+}
+
+.btn--remove-item {
+  color: white;
+  background: tomato;
+}
+
+.btn--add-item {
+  color: white;
+  background: #159515;
+}
+
+.farm-item__images > img {
+  display: block;
+  cursor: default;
+}
+
+.farm-item__images img:nth-child(even) {
+  position: relative;
+  transform: translateY(-50px);
+  margin: 0 auto -50px;
+  z-index: -1;
 }
 </style>

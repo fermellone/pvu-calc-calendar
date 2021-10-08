@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits } from "vue";
+import { ref } from "vue";
 
 const type = ref("sapling");
 
@@ -20,7 +20,9 @@ const addFarmItem = () => {
         <option value="plant" key="plant">NFT</option>
       </select>
     </div>
-    <button role="button" @click="addFarmItem">Agregar</button>
+    <button role="button" class="btn btn--add-item" @click="addFarmItem">
+      Agregar
+    </button>
   </div>
 </template>
 

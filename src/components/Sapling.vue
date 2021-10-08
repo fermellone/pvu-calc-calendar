@@ -1,5 +1,7 @@
 <script setup>
-import { ref, defineEmits, watch } from "vue";
+import { ref, watch } from "vue";
+import saplingSvg from "../assets/sapling.svg";
+import landSvg from "../assets/land.svg";
 
 // Props
 const props = defineProps({
@@ -34,8 +36,12 @@ watch(minutesLeft, (currentValue) => {
 </script>
 
 <template>
-  <div class="farm-item-container">
+  <div class="farm-item__container">
     <h4>Sapling</h4>
+    <div class="farm-item__images">
+      <img :src="saplingSvg" alt="sunflower mama" />
+      <img :src="landSvg" alt="land" />
+    </div>
     <div class="input-group">
       <label>Horas Restantes</label>
       <input type="number" v-model="hoursLeft" />
@@ -44,31 +50,8 @@ watch(minutesLeft, (currentValue) => {
       <label>Minutos Restantes</label>
       <input type="number" v-model="minutesLeft" />
     </div>
-    <button type="button" @click="removeSapling">X</button>
+    <button type="button" class="btn btn--remove-item" @click="removeSapling">
+      Quitar
+    </button>
   </div>
 </template>
-
-<style scoped>
-.farm-item-container {
-  padding: 2rem;
-  margin: 3rem;
-  border: 1px solid black;
-  max-width: fit-content;
-}
-
-.farm-item-container button {
-  margin: 1rem 0 0;
-}
-
-.farm-item-container > h4 {
-  margin: 0 0 1rem;
-}
-
-.input-group > * {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-flow: column nowrap;
-  margin: 0 auto;
-}
-</style>

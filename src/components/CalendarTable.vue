@@ -6,7 +6,6 @@ import {
   addMonths,
   addHours,
   isAfter,
-  isEqual,
   add,
   format,
 } from "date-fns";
@@ -14,16 +13,21 @@ import {
 // Props
 const props = defineProps({
   farm: Array,
+  isWorldTreeActive: Boolean,
 });
 
 // Constants
 const today = format(new Date(), "yyyy-MM-dd");
 const initialEndDate = format(addDays(new Date(), 6), "yyyy-MM-dd");
+const tomorrow = format(addDays(new Date(), 1), "yyyy-MM-dd");
 const maxDate = format(addMonths(new Date(), 2), "yyyy-MM-dd");
 
 // Data
 const startDate = ref(today);
 const endDate = ref(initialEndDate);
+
+// Emits
+const emit = defineEmits(["update:is-world-tree-active"]);
 
 // Computed properties
 const interval = computed(() => {
@@ -33,6 +37,25 @@ const interval = computed(() => {
   });
 
   return datesOfInterval;
+});
+
+const worldTreeCheckbox = computed({
+  get() {
+    return props.isWorldTreeActive;
+  },
+  set(newValue) {
+    emit("update:is-world-tree-active", newValue);
+  },
+});
+
+const totalIncomes = computed(() => {
+  return interval.value.reduce((total, currentDate) => {
+    const daysWithIncomes = props.farm.filter((item) =>
+      checkIfTableDateMatchItemHarvestDate(item, currentDate)
+    );
+    let subTotal = calcIncomesByDay(daysWithIncomes);
+    return total + subTotal;
+  }, 0);
 });
 
 // Methods
@@ -59,14 +82,32 @@ const checkIfTableDateMatchItemHarvestDate = (farmItem, date) => {
 
   return harvestDates.includes(formatDate(date));
 };
+
+const calcIncomesByDay = (daysWithIncomes) => {
+  return daysWithIncomes.reduce((subTotal, currentDay) => {
+    return subTotal + currentDay.productionLe;
+  }, 0);
+};
 </script>
 
 <template>
   <div class="CalendarTable">
-    <label>Fecha inicial</label>
-    <input type="date" v-model="startDate" :min="today" :max="maxDate" />
-    <label>Fecha final</label>
-    <input type="date" v-model="endDate" :min="tomorrow" :max="maxDate" />
+    <div class="input-group">
+      <label>Fecha inicial</label>
+      <input type="date" v-model="startDate" :min="today" :max="maxDate" />
+    </div>
+    <div class="input-group">
+      <label>Fecha final</label>
+      <input type="date" v-model="endDate" :min="tomorrow" :max="maxDate" />
+    </div>
+    <div class="input-group">
+      <label for="world-tree-checkbox">Arbol del mundo</label>
+      <input
+        type="checkbox"
+        v-model="worldTreeCheckbox"
+        id="world-tree-checkbox"
+      />
+    </div>
     <table>
       <thead>
         <tr>
@@ -91,17 +132,37 @@ const checkIfTableDateMatchItemHarvestDate = (farmItem, date) => {
           </td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <td :colspan="interval.length">Total</td>
+          <td>{{ totalIncomes }}</td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </template>
 
 <style scoped>
 .CalendarTable {
-  margin: 3rem;
+  margin: 3rem auto;
   padding: 1rem 0;
   border: 1px solid black;
+  border-radius: 7px;
   text-align: center;
   overflow: auto;
+  min-width: 90vw;
+}
+
+.CalendarTable > .input-group {
+  display: inline-flex;
+  margin: 0 1rem;
+}
+
+@media screen and (max-width: 450px) {
+  .CalendarTable > .input-group {
+    display: flex;
+    margin: 0.5rem auto;
+  }
 }
 
 table {
@@ -113,14 +174,18 @@ table {
 }
 
 thead tr {
-  background-color: #009879;
+  background-color: #159515;
   color: #ffffff;
   text-align: left;
 }
 
+thead tr th {
+  white-space: nowrap;
+}
+
 thead tr th,
 thead tr td {
-  padding: 12px 15px;
+  padding: 0.9rem 1rem;
 }
 
 tbody tr {
@@ -139,5 +204,13 @@ tbody tr td:first-of-type {
   text-transform: capitalize;
   text-align: left;
   margin-left: 0.5em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+
+tfoot tr td:first-of-type {
+  text-align: left;
 }
 </style>
