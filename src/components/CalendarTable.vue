@@ -73,7 +73,8 @@ const checkIfTableDateMatchItemHarvestDate = (farmItem, date) => {
   harvestDates.push(formatDate(harvestDate));
 
   while (
-    isAfter(new Date(endDate.value), harvestDate && !!farmItem.productionHours)
+    isAfter(new Date(endDate.value), harvestDate) &&
+    !!farmItem.productionHours
   ) {
     harvestDate = addHours(new Date(harvestDate), farmItem.productionHours);
 
