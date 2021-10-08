@@ -3,39 +3,39 @@ import { ref, defineEmits, watch } from "vue";
 
 // Props
 const props = defineProps({
-  mama: Object,
+  sapling: Object,
 });
 
 // Data
-const hoursLeft = ref(0);
-const minutesLeft = ref(0);
+const hoursLeft = ref(props.sapling?.hoursLeft);
+const minutesLeft = ref(props.sapling?.minutesLeft);
 
 // Emits
-const emit = defineEmits(["remove-mama"]);
+const emit = defineEmits(["remove-sapling", "update-hours", "update-minutes"]);
 
-const removeMama = () => {
-  emit("remove-mama", props.mama, "mama");
+const removeSapling = () => {
+  emit("remove-sapling", props.sapling, "sapling");
 };
 
-const updateMama = (newMamaObject) => {
-  emit("update-mama", newMamaObject, "mama");
+const updateSapling = (newSaplingObject) => {
+  emit("update-sapling", newSaplingObject, "sapling");
 };
 
 // Watchers
 watch(hoursLeft, (currentValue) => {
-  const newMamaObject = { ...props.mama, hoursLeft: currentValue };
-  emit("update-mama", newMamaObject, "mama");
+  const newSaplingObject = { ...props.sapling, hoursLeft: currentValue };
+  updateSapling(newSaplingObject);
 });
 
 watch(minutesLeft, (currentValue) => {
-  const newMamaObject = { ...props.mama, minutesLeft: currentValue };
-  emit("update-mama", newMamaObject, "mama");
+  const newSaplingObject = { ...props.sapling, minutesLeft: currentValue };
+  updateSapling(newSaplingObject);
 });
 </script>
 
 <template>
   <div class="farm-item-container">
-    <h4>Mama</h4>
+    <h4>Sapling</h4>
     <div class="input-group">
       <label>Horas Restantes</label>
       <input type="number" v-model="hoursLeft" />
@@ -44,7 +44,7 @@ watch(minutesLeft, (currentValue) => {
       <label>Minutos Restantes</label>
       <input type="number" v-model="minutesLeft" />
     </div>
-    <button type="button" @click="removeMama">X</button>
+    <button type="button" @click="removeSapling">X</button>
   </div>
 </template>
 
