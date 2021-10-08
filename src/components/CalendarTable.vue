@@ -25,6 +25,10 @@ const maxDate = format(addMonths(new Date(), 2), "yyyy-MM-dd");
 // Data
 const startDate = ref(today);
 const endDate = ref(initialEndDate);
+const leToPvuPrice = ref(605);
+const currentLe = ref(0);
+const currentPvu = ref(0);
+const currentSaplings = ref(0);
 
 // Emits
 const emit = defineEmits(["update:is-world-tree-active"]);
@@ -56,6 +60,44 @@ const totalIncomes = computed(() => {
     let subTotal = calcIncomesByDay(daysWithIncomes);
     return total + subTotal;
   }, 0);
+});
+
+const calculatedPvuWithCurrentLePrice = computed(() => {
+  return Number(
+    ((totalIncomes.value + calculatedTotalLe.value) / leToPvuPrice.value) * 0.95
+  );
+});
+
+const calculatedTotalPvu = computed(() => {
+  return Number(calculatedPvuWithCurrentLePrice.value + currentPvu.value);
+});
+
+const calculatedTotalLe = computed(() => {
+  return Number(totalIncomes.value + currentLe.value);
+});
+
+const worldTreeSaplings = computed(() => {
+  return Number(4 * interval.value.length);
+});
+
+const totalPlantsThatCanBeBought = computed(() => {
+  const availableSapplinsWithLe = Math.floor(calculatedTotalLe.value / 100);
+  const worldTreeSaps = worldTreeCheckbox.value ? worldTreeSaplings.value : 0;
+
+  const necesaryPvuForGerm = Math.floor(
+    ((availableSapplinsWithLe + currentSaplings.value + worldTreeSaps) / 100) *
+      4
+  );
+
+  const availableLe =
+    calculatedTotalLe.value -
+    (necesaryPvuForGerm - currentPvu.value) * leToPvuPrice.value;
+
+  const saplingsToBuyWithLe = Math.floor(availableLe / 100);
+
+  return Number(
+    (saplingsToBuyWithLe + currentSaplings.value + worldTreeSaps) / 100
+  );
 });
 
 // Methods
@@ -109,6 +151,22 @@ const calcIncomesByDay = (daysWithIncomes) => {
         id="world-tree-checkbox"
       />
     </div>
+    <div class="input-group">
+      <label>Precio actual LE -> PVU</label>
+      <input type="number" v-model="leToPvuPrice" />
+    </div>
+    <div class="input-group">
+      <label>LE actuales</label>
+      <input type="number" v-model="currentLe" />
+    </div>
+    <div class="input-group">
+      <label>PVU actuales</label>
+      <input type="number" v-model="currentPvu" />
+    </div>
+    <div class="input-group">
+      <label>Saplings actuales</label>
+      <input type="number" v-model="currentSaplings" />
+    </div>
     <table>
       <thead>
         <tr>
@@ -127,7 +185,7 @@ const calcIncomesByDay = (daysWithIncomes) => {
           >
             {{
               checkIfTableDateMatchItemHarvestDate(item, date)
-                ? item.productionLe
+                ? `${item.productionLe} LE`
                 : ""
             }}
           </td>
@@ -136,10 +194,32 @@ const calcIncomesByDay = (daysWithIncomes) => {
       <tfoot>
         <tr>
           <td :colspan="interval.length">Total</td>
-          <td>{{ totalIncomes }}</td>
+          <td>{{ totalIncomes }} LE</td>
         </tr>
       </tfoot>
     </table>
+    <div class="saplins-section">
+      <h4>Recompensas</h4>
+      <p v-if="isWorldTreeActive">
+        Saplings del árbol del mundo (4 por día):
+        {{ worldTreeSaplings }} saplings.
+      </p>
+      <p>
+        PVUs al cambio actual:
+        {{ calculatedPvuWithCurrentLePrice.toFixed(2) }} PVU.
+      </p>
+      <h4>Al final del ciclo</h4>
+      <p>
+        LEs totales:
+        {{ calculatedTotalLe.toFixed(2) }} LE.
+      </p>
+      <p>
+        PVUs totales:
+        {{ calculatedTotalPvu.toFixed(2) }} PVU.
+      </p>
+      <h4>Cambiando saplings por semillas</h4>
+      <p>Plantas: {{ totalPlantsThatCanBeBought.toFixed(4) }}</p>
+    </div>
   </div>
 </template>
 
